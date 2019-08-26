@@ -4,8 +4,10 @@ class AI
     def initialize
         @set_s = ('A'..'F').to_a.repeated_permutation(4).to_a
         @guesses = ('A'..'F').to_a.repeated_permutation(4).to_a
+    end
 
-        puts @set_s.size
+    def first_guess
+        return "AABB".split(//)
     end
 
     def next_guess(prev_guess, feedback)

@@ -1,6 +1,8 @@
+require_relative 'mastermind_ai'
+
 module Mastermind
 
-    def Mastermind.check_guess(guess, solution) 
+    def self.check_guess(guess, solution) 
         bulls = 0
         cows = 0
         copy = solution.dup
@@ -42,6 +44,50 @@ class Game
     end
 
     def play
+        mode = select_mode
+        if mode == "1"
+            play_codebreaker
+        elsif mode == "2"
+            play_codemaker
+        end
+    end
+
+    def select_mode
+        puts "Please select the mode you wish to play:\n 1 - to play as codebreaker\n 2 - to play as codemaker"
+        mode = gets.chomp
+        until mode.match(/^[1-2]$/) do
+            puts "Invalid mode selected, try again:"
+            mode = gets.chomp
+        end
+        mode
+    end
+
+    def play_codemaker
+        secret = ""
+        until(valid_guess?secret) do
+            puts "Choose your secret:"
+            secret = gets.chomp
+        end
+        @board = secret.split(//)
+
+        turn = 1
+        breaker = AI.new
+        guess = breaker.first_guess
+        until turn == 12 do
+            puts "AI's guess #{turn} is: #{guess}"
+            feedback = check_guess(guess.join)
+            if feedback[0] == 4
+                puts "The computer wins!"
+                break
+            else
+                turn += 1
+                guess = breaker.next_guess(guess, feedback)
+            end
+        end
+    end
+    
+
+    def play_codebreaker
         randomize_board
         puts "Welcome to mastermind!"
         loop do
@@ -63,30 +109,7 @@ class Game
     end
 
     def check_guess(guess_string)
-        bulls = 0
-        cows = 0
-        copy = @board.dup
-        guess = guess_string.split(//)
-
-        guess.each_with_index do |peg, index|
-            if @board[index] == peg
-                bulls += 1
-                copy[index] = nil
-                guess[index] = nil
-            end
-        end
-
-        copy.compact!
-        guess.compact!
-
-        guess.each do |peg|
-            if copy.include?peg
-                cows += 1
-                copy.delete_at(copy.index(peg))
-            end
-        end
-
-        return [bulls, cows]
+        Mastermind::check_guess(guess_string.split(//), board)
     end
 
     def get_guess
